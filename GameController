@@ -1,0 +1,175 @@
+using UnityEngine;
+using UnityEngine.UI;
+public class Controller : MonoBehaviour
+{
+
+    public int whoseTurn; //0=x 1=o
+    public int turnCount; // counts the turns played
+    public Button[] tictactoeSpaces; //spaces in the game
+    public GameObject[] turnIcons; //upper corners of the screen showing current turn
+    public Sprite[] playerIcons; //x and o icons
+    public int[] markedSpaces;
+    public GameObject[] winningBlueLines;
+    public GameObject[] winningOrangeLines;
+    public AudioSource winSound;
+    public AudioSource[] place;
+    public GameObject[] winningString;
+    public GameObject winnerPanel;
+    public AudioSource buttonSound;
+
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        GameSetup();
+    }
+
+    void GameSetup()
+    {
+        winnerPanel.SetActive(false);
+        Debug.Log("startup working");
+        whoseTurn = 0;
+        turnCount = 0;
+        turnIcons[0].SetActive(true);
+        turnIcons[1].SetActive(false);
+        winningString[0].SetActive(false);
+        winningString[1].SetActive(false);
+        winningString[2].SetActive(false);
+        for (int i = 0; i < winningOrangeLines.Length; i++)
+        {
+            winningOrangeLines[i].SetActive(false);
+            winningBlueLines[i].SetActive(false);
+        }
+
+        for (int i = 0; i < tictactoeSpaces.Length; i++)
+        {
+            Debug.Log("first loop working");
+            tictactoeSpaces[i].interactable = true;
+            tictactoeSpaces[i].GetComponent<Image>().sprite = null;
+        }
+        for (int i = 0; i < markedSpaces.Length; i++)
+        {
+            Debug.Log("initizalizing values working");
+            markedSpaces[i] = 100;
+            tictactoeSpaces[i].image.sprite = playerIcons[0];
+        }
+    }
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
+    public void TickTacToeButton(int WhichNumber)
+    {
+        place[whoseTurn].Play();
+        tictactoeSpaces[WhichNumber].image.sprite = playerIcons[whoseTurn];
+        markedSpaces[WhichNumber] = whoseTurn + 1;
+        for (int i = 0; i < markedSpaces.Length; i++)
+        {
+            if (markedSpaces[i] == 100)
+            {
+                if (whoseTurn == 1)
+                {
+                    tictactoeSpaces[i].image.sprite = playerIcons[0];
+                }
+                else
+                {
+                    tictactoeSpaces[i].image.sprite = playerIcons[1];
+                }
+
+                Debug.Log("setting icons");
+            }
+        }
+
+
+        tictactoeSpaces[WhichNumber].interactable = false;
+
+
+
+        turnCount++;
+        if (turnCount > 4)
+        {
+            bool isWinner = WinnerCheck();
+            if (turnCount == 9 && isWinner == false)
+            {
+                cat();
+            }
+        }
+
+        if (whoseTurn == 0)
+        {
+            whoseTurn = 1;
+
+            turnIcons[0].SetActive(false);
+            turnIcons[1].SetActive(true);
+        }
+        else
+        {
+            whoseTurn = 0;
+            turnIcons[0].SetActive(true);
+            turnIcons[1].SetActive(false);
+        }
+
+    }
+    bool WinnerCheck()
+    {
+        int s1 = markedSpaces[0] + markedSpaces[1] + markedSpaces[2];
+        int s2 = markedSpaces[3] + markedSpaces[4] + markedSpaces[5];
+        int s3 = markedSpaces[6] + markedSpaces[7] + markedSpaces[8];
+        int s4 = markedSpaces[0] + markedSpaces[3] + markedSpaces[6];
+        int s5 = markedSpaces[1] + markedSpaces[4] + markedSpaces[7];
+        int s6 = markedSpaces[2] + markedSpaces[5] + markedSpaces[8];
+        int s7 = markedSpaces[0] + markedSpaces[4] + markedSpaces[8];
+        int s8 = markedSpaces[6] + markedSpaces[4] + markedSpaces[2];
+        var solutions = new int[] { s1, s2, s3, s4, s5, s6, s7, s8 };
+        for (int i = 0; i < solutions.Length; i++)
+        {
+            if (solutions[i] == 3 * (whoseTurn + 1))
+            {
+                WinnerDisplay(i);
+                return true;
+            }
+        }
+        return false;
+    }
+    void WinnerDisplay(int indexIn)
+    {
+
+        winnerPanel.SetActive(true);
+        if (whoseTurn == 0)
+        {
+            winningOrangeLines[indexIn].SetActive(true);
+        }
+        else if (whoseTurn == 1)
+        {
+
+            winningBlueLines[indexIn].SetActive(true);
+        }
+
+        for (int i = 0; i < tictactoeSpaces.Length; i++)
+        {
+            tictactoeSpaces[i].interactable = false;
+        }
+        winningString[whoseTurn].SetActive(true);
+        winSound.Play();
+
+    }
+
+    public void Rematch()
+    {
+        winnerPanel.SetActive(false);
+        winningString[2].SetActive(false);
+        GameSetup();
+
+    }
+    void cat()
+    {
+        winnerPanel.SetActive(true);
+        winningString[2].SetActive(true);
+
+    }
+    public void ButtonSound()
+    {
+        buttonSound.Play();
+    }
+}
